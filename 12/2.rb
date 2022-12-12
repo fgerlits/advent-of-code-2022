@@ -11,12 +11,6 @@ heightmap = parse_input(ARGF)
 edges, _, start = create_graph(heightmap)
 distances = dijkstra(edges, start)
 
-finishes = heightmap.map.with_index do |row, i|
-  row.map.with_index do |height, j|
-    if height == 'a' || height == 'S'
-      [i, j]
-    end
-  end.compact
-end.flatten(1)
-
-puts finishes.map{|i, j| distances[[i, j]]}.min
+puts distances.select{|vertex, _| i, j = vertex; h = heightmap[i][j]; h == 'a' || h == 'S'}
+    .map{|_, distance| distance}
+    .min
