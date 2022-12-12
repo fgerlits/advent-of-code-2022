@@ -8,10 +8,6 @@ class Operation
       @arg = $2.to_i
     end
   end
-  
-  def set_modulus(modulus)
-    @modulus = modulus
-  end
 
   def apply(number)
     if @arg == :old
@@ -27,8 +23,8 @@ class Operation
       when '/' then number / arg
     end
 
-    if @modulus
-      result % @modulus
+    if $modulus
+      result % $modulus
     else
       result
     end
@@ -60,21 +56,14 @@ class Monkey
     @num_inspected = 0
   end
 
-  def set_modulus(modulus)
-    @operation.set_modulus(modulus)
-  end
-
-  def throw_one(worry_level_reduction)
+  def throw_one
     item = @items.shift
     if item.nil?
       return nil
     end
 
-    item = @operation.apply(item)
+    item = reduce(@operation.apply(item))
     @num_inspected += 1
-    if worry_level_reduction
-      item /= worry_level_reduction
-    end
     if @test.apply(item)
       [item, @on_true]
     else
@@ -89,4 +78,13 @@ end
 
 def parse_input(stream)
   stream.readlines.map(&:chomp).slice_after('').map{|lines| Monkey.new(lines[1..5])}
+end
+
+def iterate(monkeys)
+  monkeys.each do |monkey|
+    while thrown = monkey.throw_one
+      item, target = thrown
+      monkeys[target].catch_one(item)
+    end
+  end
 end
