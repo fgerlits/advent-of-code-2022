@@ -32,7 +32,7 @@ def create_graph(heightmap)
     row.each_with_index do |height, j|
       neighbors(i, j).each do |ni, nj|
         if allowed?(heightmap[i][j], heightmap[ni][nj])
-          edges << [[i, j], [ni, nj], 1]
+          edges << [[i, j], [ni, nj]]
         end
       end
     end
