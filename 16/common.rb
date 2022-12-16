@@ -1,6 +1,6 @@
-class Cave
-  attr_reader :tunnels, :flow_rate, :size
+require_relative '../util/breadth_first_search'
 
+class Cave
   def initialize(lines)
     @tunnels = Hash.new(Array.new)
     @flow_rate = Hash.new
@@ -10,57 +10,25 @@ class Cave
       @flow_rate[current] = flow_rate.to_i
       @tunnels[current] = neighbors.split(', ')
     end
-    @size = @flow_rate.size
+  end
+
+  def flow_at(node)
+    @flow_rate[node]
+  end
+
+  def edges
+    @tunnels.map{|from, neighbors| neighbors.map{|to| [from, to]}}.flatten(1)
+  end
+
+  def nodes_with_flow
+    @flow_rate.select{|node, rate| rate > 0}.map{|node, rate| node}
   end
 end
 
-class State
-  attr_reader :current, :open_valves
-
-  def initialize(current, open_valves)
-    @current = current
-    @open_valves = open_valves
-  end
-
-  def continuations(cave)
-    if @open_valves.size == cave.size
-      return []
-    end
-
-    cave.tunnels[@current].map do |neighbor|
-      [:move, neighbor]
-    end +
-    if !@open_valves.include?(@current) && cave.flow_rate[@current] != 0
-      [[:open]]
-    else
-      []
-    end
-  end
-
-  def apply(step)
-    if step[0] == :move
-      State.new(step[1], @open_valves)
-    else
-      State.new(@current, @open_valves + [@current])
-    end
-  end
-
-  def to_s
-    "(#{@current} [#{@open_valves.join(', ')}])"
-  end
-end
-
-def apply(steps)
-  steps.inject(State.new(START_NODE, [])){|state, step| state.apply(step)}
-end
-
-def value(steps, cave)
-  state = State.new(START_NODE, [])
-  (1..30).zip(steps).map do |time, step|
-    flow = state.open_valves.map{|node| cave.flow_rate[node]}.sum
-    if step
-      state = state.apply(step)
-    end
-    flow
-  end.sum
+def graph(cave)
+  vertices = ['AA'] + cave.nodes_with_flow
+  edges = cave.edges
+  vertices.map do |vertex|
+    [vertex, breadth_first_search(edges, vertex).select{|v, d| vertices.include?(v)}]
+  end.to_h
 end

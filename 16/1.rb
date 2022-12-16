@@ -3,18 +3,24 @@
 require 'set'
 require_relative 'common'
 
-START_NODE = 'AA'
 cave = Cave.new(ARGF)
+vertices = cave.nodes_with_flow
+graph = graph(cave)
 
-visited = Set.new
-states = [[[], State.new(START_NODE, [])]]
-paths = (1..14).map do |n|
-  puts "#{n} -> #{states.size}"
-  states.each{|path, state| visited << state}
-  states = states.map do |path, state|
-    state.continuations(cave).map{|step| [path + [step], state.apply(step)]}
-      .select{|path, state| !visited.include?(state)}
-  end.flatten(1)
-end.flatten(1)
+totals = vertices.permutation.map do |path|
+  time = 0
+  current = 'AA'
+  total = 0
+  path.each do |step|
+    switched_on_at = time + graph[current][step] + 1
+    time = switched_on_at
+    if time >= 30
+      break
+    end
+    current = step
+    total += (30 - switched_on_at) * cave.flow_at(step)
+  end
+  [path, total]
+end
 
-puts paths.map{|path, state| value(path, cave)}.max
+puts totals.max_by{|_, total| total}
