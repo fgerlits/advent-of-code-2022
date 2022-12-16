@@ -38,7 +38,7 @@ def max_on_vertices(vertices, cave, graph, num_steps)
   vertices.permutation.map do |path|
     path = path.map do |step|
       if step == 'FI'
-        ['FI', 'AT', 'TO']
+        ['AT', 'TO', 'FI']
       elsif step == 'KB'
         ['KB', 'NA', 'XX', 'UD', 'YD']
       else
