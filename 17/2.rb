@@ -15,13 +15,11 @@ def find_loop
     stack.add(shapes.get, wind)
     $stack_height[counter] = stack.height
 
-    if shapes.pos == 0
-      loop_start  = first_seen[[wind.pos, stack.last(10)]]
-      if !loop_start.nil?
-        return [loop_start, counter - loop_start]
-      end
-      first_seen[[wind.pos, stack.last(10).clone]] = counter
+    loop_start  = first_seen[[shapes.pos, wind.pos, stack.last(10)]]
+    if !loop_start.nil?
+      return [loop_start, counter - loop_start]
     end
+    first_seen[[shapes.pos, wind.pos, stack.last(10).clone]] = counter
   end
 end
 
