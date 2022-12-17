@@ -1,4 +1,6 @@
 class Shapes
+  attr_reader :pos
+
   def initialize(stream)
     @shapes = stream.map(&:chomp).slice_after('').map do |lines|
       if lines[-1] == ''
@@ -17,6 +19,8 @@ class Shapes
 end
 
 class Wind
+  attr_reader :pos
+
   def initialize(line)
     @directions = line.chomp.each_char.map do |c|
       case c
@@ -103,4 +107,6 @@ class Stack
       @stack.pop
     end
   end
+
+  def last(n) = @stack.last(n)
 end
