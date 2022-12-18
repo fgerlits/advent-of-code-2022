@@ -1,8 +1,11 @@
+FACES = [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]]
+
+def neighbor_at(cube, direction)
+  cube.zip(direction).map{|coord, diff| coord + diff}
+end
+
 def neighbors(cube)
-  x, y, z = cube
-  [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]].map do |dx, dy, dz|
-    [x + dx, y + dy, z + dz]
-  end
+  FACES.map{|face| neighbor_at(cube, face)}
 end
 
 def num_exposed_sides(cube, cubes)
