@@ -1,3 +1,5 @@
+require 'set'
+
 FACES = [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]]
 
 def neighbor_at(cube, direction)
@@ -13,5 +15,5 @@ def num_exposed_sides(cube, cubes)
 end
 
 def parse_input(stream)
-  stream.map{|line| line.split(',').map(&:to_i)}
+  Set.new(stream.map{|line| line.split(',').map(&:to_i)})
 end
