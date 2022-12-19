@@ -28,8 +28,8 @@ class Rule
   end
 end
 
-def all_ways_to_apply_using_first(rules, resources)
-  rule = rules.first
+def all_ways_to_apply_using_last(rules, resources)
+  rule = rules.last
   if rule.can_apply?(resources)
     others = all_ways_to_apply(rules, rule.apply(resources))
     if others.empty?
@@ -43,9 +43,12 @@ def all_ways_to_apply_using_first(rules, resources)
 end
 
 def all_ways_to_apply(rules, resources)
-  (0...rules.size).map do |i|
-    all_ways_to_apply_using_first(rules[i..], resources)
-  end.flatten(1) + [[]]
+  ways_using_last = all_ways_to_apply_using_last(rules, resources)
+  if !ways_using_last.empty? || rules.size == 1
+    ways_using_last
+  else
+    all_ways_to_apply(rules[...-1], resources)
+  end
 end
 
 def produce_resources(resources, robots)
