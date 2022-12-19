@@ -14,4 +14,34 @@ class Rule
       @cost += [[$4.to_i, $5]]
     end
   end
+
+  def can_apply?(resources)
+    @cost.all?{|number, type| resources[type] >= number}
+  end
+
+  def apply(resources)
+    new_resources = resources.clone
+    @cost.each{|number, type| new_resources[type] -= number}
+    new_resources
+  end
+end
+
+def all_ways_to_apply(rules, resources)
+  # TODO
+end
+
+class Node
+  def initialize(time, resources, robots, pending_robots)
+    @time, @resources, @robots, @pending_robots = time, resources, robots, pending_robots
+  end
+
+  def next_nodes(rules)
+    # TODO
+  end
+
+  def create_resources
+    @robots.each do |robot_type, number|
+      @resources[robot_type] += number
+    end
+  end
 end
