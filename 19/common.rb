@@ -28,27 +28,19 @@ class Rule
   end
 end
 
-def all_ways_to_apply_using_last(rules, resources)
-  rule = rules.last
+def all_ways_to_apply_using_first(rules, resources)
+  rule = rules.first
   if rule.can_apply?(resources)
-    others = all_ways_to_apply(rules, rule.apply(resources))
-    if others.empty?
-      [[rule]]
-    else
-      others.map{|rule_seq| [rule] + rule_seq}
-    end
+    all_ways_to_apply(rules, rule.apply(resources)).map{|rule_seq| [rule] + rule_seq}
   else
     []
   end
 end
 
 def all_ways_to_apply(rules, resources)
-  ways_using_last = all_ways_to_apply_using_last(rules, resources)
-  if !ways_using_last.empty? || rules.size == 1
-    ways_using_last
-  else
-    all_ways_to_apply(rules[...-1], resources)
-  end
+  [[]] + (0...rules.size).map do |i|
+    all_ways_to_apply_using_first(rules[i..], resources)
+  end.flatten(1)
 end
 
 def produce_resources(resources, robots)
@@ -79,15 +71,16 @@ class Node
 
   def to_s = "time = #{@time}, resources = #{@resources}, robots = #{@robots}"
 
-  def next_nodes(rules)
+  def random_step(rules)
     time = @time + 1
     increased_resources = produce_resources(@resources, @robots)
 
-    all_ways_to_apply(rules, @resources).map do |rule_seq|
-      resources, robots = build_robots(increased_resources, @robots, rule_seq)
-      Node.new(time, resources, robots)
-    end
+    rule_seq = all_ways_to_apply(rules, @resources).sample
+    resources, robots = build_robots(increased_resources, @robots, rule_seq)
+    Node.new(time, resources, robots)
   end
+
+  def num_geodes = @resources['geode']
 
   def <=>(other)
     [@time, @resources.to_a, @robots.to_a] <=> [other.time, other.resources.to_a, other.robots.to_a]
