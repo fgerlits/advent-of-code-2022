@@ -10,10 +10,13 @@ end
 class Cycle
   attr_reader :size
 
-  def initialize(stream)
+  def initialize(stream, key)
     values = stream.map(&:to_i)
     @size = values.size
     @cycle = values.map.with_index do |value, index|
+      if !key.nil?
+        value *= key
+      end
       Node.new(value, (index - 1) % @size, (index + 1) % @size)
     end
   end
@@ -35,6 +38,18 @@ class Cycle
       current.prev = new_before
       current.succ = new_after
       at(new_after).prev = index
+    end
+  end
+
+  def mix!
+    (0...@size).each{|index| move!(index)}
+  end
+
+  def grove_coordinates
+    index = (0...@size).find{|index| at(index).value == 0}
+    3.times.map do
+      1000.times{ index = at(index).succ }
+      at(index).value
     end
   end
 
