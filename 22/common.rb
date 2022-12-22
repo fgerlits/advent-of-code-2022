@@ -36,30 +36,14 @@ class Grid
 
   def step!(num)
     num.times do
-      pos = @pos.zip(@heading).map{|coord, diff| coord + diff}
-      pos = wrap_if_needed(pos)
+      pos, heading = @pos.zip(@heading).map{|coord, diff| coord + diff}, @heading
+      if !valid?(at(pos))
+        pos, heading = wrap(self, pos, @heading)
+      end
       if blocked?(at(pos))
         return
       else
-        @pos = pos
-      end
-    end
-  end
-
-  def wrap_if_needed(pos)
-    if valid?(at(pos))
-      pos
-    else
-      x, y = pos
-      case @heading
-      when [0, 1]
-        [x, left_of_row(x)]
-      when [0, -1]
-        [x, right_of_row(x)]
-      when [1, 0]
-        [top_of_column(y), y]
-      when [-1, 0]
-        [bottom_of_column(y), y]
+        @pos, @heading = pos, heading
       end
     end
   end
