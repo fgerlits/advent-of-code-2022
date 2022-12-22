@@ -47,7 +47,7 @@ class Grid
   end
 
   def wrap_if_needed(pos)
-    if at(pos)
+    if valid?(at(pos))
       pos
     else
       x, y = pos
@@ -83,8 +83,10 @@ class Grid
     (x + 1) * 1000 + (y + 1) * 4 + HEADING_VALUES[@heading]
   end
 
+  NAME_OF_HEADING = {[0, 1] => 'right', [1, 0] => 'down', [0, -1] => 'left', [-1, 0] => 'up'}
+
   def state
-    "#{@pos}, heading: #{@heading}"
+    "#{@pos.map{|coord| coord + 1}}, heading: #{NAME_OF_HEADING[@heading]}"
   end
 end
 
