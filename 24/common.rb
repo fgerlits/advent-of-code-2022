@@ -36,6 +36,8 @@ class Grid
     @my_pos == other.my_pos && @blizzards.eql?(other.blizzards)
   end
 
+  def ==(other) = eql?(other)
+
   def neighbors
     ns = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]].map do |direction|
       if can_move?(direction)
@@ -63,7 +65,7 @@ class Grid
 
   def step_blizzards
     new_grid = self.clone
-    new_grid.blizzards = @blizzards.map{|blizzard| step(blizzard)}
+    new_grid.blizzards = Set.new(@blizzards.map{|blizzard| step(blizzard)})
     new_grid
   end
 
