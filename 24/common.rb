@@ -52,26 +52,8 @@ class Blizzards
     Blizzards.new(@blizzards.map{|blizzard| step_one(blizzard)})
   end
 
-  def to_grid
-    (1..X_SIZE).map do |x|
-      row = '#' + '.' * Y_SIZE + '#'
-      @blizzards.each do |bx, by, bc|
-        if bx == x
-          if row[by] == '.'
-            row[by] = bc
-          elsif DIRECTIONS.include?(row[by])
-            row[by] = '2'
-          elsif row[by] =~ /\d/
-            row[by] = (row[by].to_i + 1).to_s
-          end
-        end
-      end
-      row
-    end
-  end
-
   def to_s
-    to_grid.join("\n")
+    to_grid(@blizzards).join("\n")
   end
 
   def hash = @blizzards.hash
@@ -79,8 +61,27 @@ class Blizzards
   def ==(other) = eql?(other)
 end
 
+def to_grid(blizzards)
+  (1..X_SIZE).map do |x|
+    row = '#' + '.' * Y_SIZE + '#'
+    blizzards.each do |bx, by, bc|
+      if bx == x
+        if row[by] == '.'
+          row[by] = bc
+        elsif DIRECTIONS.include?(row[by])
+          row[by] = '2'
+        elsif row[by] =~ /\d/
+          row[by] = (row[by].to_i + 1).to_s
+        end
+      end
+    end
+    row
+  end
+end
 
 class State
+  attr_reader :my_pos
+
   def initialize(my_pos, blizzards_num)
     @my_pos = my_pos
     @blizzards_num = blizzards_num
@@ -117,15 +118,11 @@ class State
     State.new(new_pos, new_blizzards_num)
   end
 
-  def at_exit?
-    @my_pos == [X_SIZE + 1, EXIT_COLUMN]
-  end
-
   def to_s
     top = '#' * (Y_SIZE + 2)
     top[ENTRANCE_COLUMN] = '.'
 
-    middle = BLIZZARDS_INVENTORY[@blizzards_num].to_grid
+    middle = to_grid(BLIZZARDS_INVENTORY[@blizzards_num])
 
     bottom = '#' * (Y_SIZE + 2)
     bottom[EXIT_COLUMN] = '.'
@@ -144,8 +141,8 @@ def length_of_shortest_path(state)
   while !todo_list.empty?
     state, num_steps = todo_list.shift
 
-    if state.at_exit?
-      return num_steps
+    if yield(state.my_pos)
+      return [num_steps, state]
     end
 
     if num_steps > steps
