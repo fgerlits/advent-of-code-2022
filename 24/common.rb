@@ -85,20 +85,23 @@ class State
 
   def new_pos(direction) = @my_pos.zip(direction).map{|coord, diff| coord + diff}
 
+  def new_blizzards_num = (@blizzards_num + 1) % BLIZZARDS_INVENTORY.size
+
+  def new_blizzards = BLIZZARDS_INVENTORY[new_blizzards_num]
+
   def can_move?(direction)
     x, y = new_pos(direction)
     if x == 0
       y == ENTRANCE_COLUMN
     elsif x >= 1 && x <= X_SIZE && y >= 1 && y <= Y_SIZE
-      blizzards = BLIZZARDS_INVENTORY[@blizzards_num]
-      DIRECTIONS.none?{|dir| blizzards.include?([x, y, dir])}
+      DIRECTIONS.none?{|dir| new_blizzards.include?([x, y, dir])}
     elsif x == X_SIZE + 1
       y == EXIT_COLUMN
     end
   end
 
   def move(direction)
-    State.new(new_pos(direction), (@blizzards_num + 1) % BLIZZARDS_INVENTORY.size)
+    State.new(new_pos(direction), new_blizzards_num)
   end
 
   def to_s
