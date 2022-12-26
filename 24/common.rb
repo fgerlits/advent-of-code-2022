@@ -18,7 +18,11 @@ def parse_input(stream)
     end
   end
   
-  [x_size, y_size, entrance_column, exit_column, Blizzards.new(blizzards)]
+  [x_size, y_size, entrance_column, exit_column, Set.new(blizzards)]
+end
+
+def step(blizzards)
+  Set.new(blizzards.map{|blizzard| step_one(blizzard)})
 end
 
 def step_one(blizzard)
@@ -40,26 +44,6 @@ def step_one(blizzard)
 end
 
 DIRECTIONS = ['<', '>', 'v', '^']
-
-class Blizzards
-  attr_reader :blizzards
-
-  def initialize(array)
-    @blizzards = Set.new(array)
-  end
-  
-  def step
-    Blizzards.new(@blizzards.map{|blizzard| step_one(blizzard)})
-  end
-
-  def to_s
-    to_grid(@blizzards).join("\n")
-  end
-
-  def hash = @blizzards.hash
-  def eql?(other) = @blizzards.eql?(other.blizzards)
-  def ==(other) = eql?(other)
-end
 
 def to_grid(blizzards)
   (1..X_SIZE).map do |x|
@@ -93,15 +77,17 @@ class State
   def ==(other) = eql?(other)
 
   def neighbors
-    ns = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]].map do |direction|
+    [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]].map do |direction|
       if can_move?(direction)
         move(direction)
       end
     end.compact
   end
 
+  def new_pos(direction) = @my_pos.zip(direction).map{|coord, diff| coord + diff}
+
   def can_move?(direction)
-    x, y = @my_pos.zip(direction).map{|coord, diff| coord + diff}
+    x, y = new_pos(direction)
     if x == 0
       y == ENTRANCE_COLUMN
     elsif x >= 1 && x <= X_SIZE && y >= 1 && y <= Y_SIZE
@@ -113,9 +99,7 @@ class State
   end
 
   def move(direction)
-    new_pos = @my_pos.zip(direction).map{|coord, diff| coord + diff}
-    new_blizzards_num = (@blizzards_num + 1) % BLIZZARDS_INVENTORY.size
-    State.new(new_pos, new_blizzards_num)
+    State.new(new_pos(direction), (@blizzards_num + 1) % BLIZZARDS_INVENTORY.size)
   end
 
   def to_s
@@ -136,17 +120,12 @@ end
 def length_of_shortest_path(state)
   visited = Set.new([state])
   todo_list = [[state, 0]]
-  steps = 0
 
   while !todo_list.empty?
     state, num_steps = todo_list.shift
 
     if yield(state.my_pos)
       return [num_steps, state]
-    end
-
-    if num_steps > steps
-      steps = num_steps
     end
 
     neighbors = state.neighbors
@@ -162,10 +141,9 @@ end
 def find_all_blizzards(blizzards)
   seen_at = {blizzards => 0}
   (1..).each do |n|
-    blizzards = blizzards.step
-    seen = seen_at[blizzards]
-    if !seen.nil?
-      return seen_at.map{|blizzards, n| [n, blizzards.blizzards]}.to_h
+    blizzards = step(blizzards)
+    if seen_at[blizzards]
+      return seen_at.map{|blizzards, n| [n, blizzards]}.to_h
     else
       seen_at[blizzards] = n
     end
