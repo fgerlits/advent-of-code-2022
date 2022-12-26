@@ -1,5 +1,7 @@
 require 'set'
 
+DIRECTIONS = ['<', '>', 'v', '^']
+
 def parse_input(stream)
   lines = stream.map(&:chomp)
 
@@ -7,7 +9,7 @@ def parse_input(stream)
   y_size = lines[0].size - 2
 
   entrance_column = lines[0].index('.')
-  exit_column = lines[-1].rindex('.')
+  exit_column = lines[-1].index('.')
 
   blizzards = []
   lines.each_with_index do |row, x|
@@ -43,12 +45,10 @@ def step_one(blizzard)
   end
 end
 
-DIRECTIONS = ['<', '>', 'v', '^']
-
 def to_grid(blizzards)
   (1..X_SIZE).map do |x|
-    row = '#' + '.' * Y_SIZE + '#'
-    blizzards.each do |bx, by, bc|
+    blizzards.each_with_object('#' + '.' * Y_SIZE + '#') do |blizzard, row|
+      bx, by, bc = blizzard
       if bx == x
         if row[by] == '.'
           row[by] = bc
@@ -59,7 +59,6 @@ def to_grid(blizzards)
         end
       end
     end
-    row
   end
 end
 
